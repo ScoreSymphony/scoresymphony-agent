@@ -1,5 +1,5 @@
 # Frontend
 
-Reserved for the future ScoreSymphony Agent web interface.
+Reserved for the ScoreSymphony Agent dashboard.
 
-No frontend framework is selected or installed yet.
+The dashboard is intentionally not implemented in the bootstrap. It will consume the existing `/v1` API rather than duplicate runtime logic. Initial views should cover tasks, runs, attempts, reviews, events and health/status. Security-sensitive actions remain controlled by backend policy and are never implemented as frontend-only gates.
