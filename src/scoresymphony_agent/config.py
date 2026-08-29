@@ -15,7 +15,7 @@ class Settings:
     environment: str = "development"
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         environment = os.getenv("SCORESYMPHONY_ENV", "development")
         if environment not in {"development", "test", "production"}:
             raise ValueError("SCORESYMPHONY_ENV must be development, test, or production")

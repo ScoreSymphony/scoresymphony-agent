@@ -46,7 +46,7 @@ class Task:
         risk: RiskClass = RiskClass.LOW,
         scope: list[str] | None = None,
         acceptance_criteria: list[str] | None = None,
-    ) -> "Task":
+    ) -> Task:
         if not title.strip():
             raise ValueError("Task title must not be empty")
         return cls(
@@ -62,7 +62,7 @@ class Task:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> "Task":
+    def from_dict(cls, value: dict[str, Any]) -> Task:
         return cls(
             task_id=str(value["task_id"]),
             title=str(value["title"]),

@@ -28,7 +28,7 @@ class Attempt:
     failure_reason: str | None = None
 
     @classmethod
-    def new(cls, agent_id: str) -> "Attempt":
+    def new(cls, agent_id: str) -> Attempt:
         return cls(attempt_id=make_id("ATTEMPT"), agent_id=agent_id)
 
 
@@ -43,14 +43,14 @@ class Run:
     schema_version: int = 1
 
     @classmethod
-    def new(cls, task_id: str) -> "Run":
+    def new(cls, task_id: str) -> Run:
         return cls(run_id=make_id("RUN"), task_id=task_id)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> "Run":
+    def from_dict(cls, value: dict[str, Any]) -> Run:
         attempts = [
             Attempt(
                 attempt_id=str(item["attempt_id"]),

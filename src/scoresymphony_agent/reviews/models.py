@@ -32,7 +32,7 @@ class Finding:
     review_round: int
 
     @classmethod
-    def new(cls, **kwargs: Any) -> "Finding":
+    def new(cls, **kwargs: Any) -> Finding:
         return cls(finding_id=make_id("FINDING"), **kwargs)
 
 
@@ -49,7 +49,7 @@ class ReviewResult:
     schema_version: int = 1
 
     @classmethod
-    def approved(cls, recommendation: str = "") -> "ReviewResult":
+    def approved(cls, recommendation: str = "") -> ReviewResult:
         return cls(
             review_id=make_id("REVIEW"),
             review_status=ReviewStatus.APPROVED,

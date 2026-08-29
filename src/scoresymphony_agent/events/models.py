@@ -23,7 +23,7 @@ class Event:
     schema_version: int = 1
 
     @classmethod
-    def new(cls, *, sequence: int, event_type: str, component: str, result: str, **kwargs: Any) -> "Event":
+    def new(cls, *, sequence: int, event_type: str, component: str, result: str, **kwargs: Any) -> Event:
         return cls(
             event_id=make_id("EVENT"),
             sequence=sequence,
