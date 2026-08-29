@@ -4,10 +4,15 @@
   "title": "ScoreSymphony Agent Review Result",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "review_id", "review_status", "findings", "scope_assessment", "test_assessment", "unauthorized_changes", "recommendation", "created_at"],
+  "required": ["schema_version", "review_id", "task_id", "run_id", "attempt_id", "reviewer_id", "review_round", "review_status", "findings", "scope_assessment", "test_assessment", "unauthorized_changes", "recommendation", "created_at"],
   "properties": {
     "schema_version": {"const": 1},
-    "review_id": {"type": "string"},
+    "review_id": {"type": "string", "pattern": "^SCORESYMPHONY-REVIEW-"},
+    "task_id": {"type": "string", "pattern": "^SCORESYMPHONY-TASK-"},
+    "run_id": {"type": "string", "pattern": "^SCORESYMPHONY-RUN-"},
+    "attempt_id": {"type": "string", "pattern": "^SCORESYMPHONY-ATTEMPT-"},
+    "reviewer_id": {"type": "string", "minLength": 1},
+    "review_round": {"type": "integer", "minimum": 1},
     "review_status": {"enum": ["approved", "changes_requested", "blocked"]},
     "findings": {
       "type": "array",

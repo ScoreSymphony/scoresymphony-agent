@@ -15,3 +15,4 @@ def test_health_and_task_api(tmp_path: Path) -> None:
     assert response.status_code == 201
     task_id = response.json()["task_id"]
     assert client.get(f"/v1/tasks/{task_id}").status_code == 200
+    assert client.get(f"/v1/tasks/{task_id}/runs").json() == []

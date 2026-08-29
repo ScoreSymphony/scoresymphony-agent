@@ -20,4 +20,10 @@ class MockReviewer:
     def review(self, request: WorkerRequest, result: WorkerResult) -> ReviewResult:
         if not result.success:
             raise ValueError("MockReviewer cannot approve a failed worker result")
-        return ReviewResult.approved("Mock review approved deterministic test result")
+        return ReviewResult.approved(
+            task_id=request.task_id,
+            run_id=request.run_id,
+            attempt_id=request.attempt_id,
+            reviewer_id=self.reviewer_id,
+            recommendation="Mock review approved deterministic test result",
+        )

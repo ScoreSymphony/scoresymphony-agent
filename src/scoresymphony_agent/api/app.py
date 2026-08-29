@@ -64,6 +64,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=400, detail="Invalid task id") from exc
 
+    @app.get("/v1/tasks/{task_id}/runs")
+    def list_task_runs(task_id: str) -> list[dict]:
+        try:
+            runtime.tasks.get(task_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="Task not found") from exc
+        return [run.to_dict() for run in runtime.runs.list_for_task(task_id)]
+
+    @app.get("/v1/runs/{run_id}/reviews")
+    def list_run_reviews(run_id: str) -> list[dict]:
+        try:
+            runtime.runs.get(run_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="Run not found") from exc
+        return [review.to_dict() for review in runtime.reviews.list_for_run(run_id)]
+
     return app
 
 

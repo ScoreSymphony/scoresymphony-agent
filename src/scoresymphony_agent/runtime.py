@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from scoresymphony_agent.events.store import EventStore
 from scoresymphony_agent.ids import utc_now
 from scoresymphony_agent.reviews.base import Reviewer
 from scoresymphony_agent.reviews.models import ReviewResult, ReviewStatus
+from scoresymphony_agent.reviews.store import ReviewStore
 from scoresymphony_agent.reviews.validator import validate_review
 from scoresymphony_agent.runs.models import Attempt, Run, RunStatus
 from scoresymphony_agent.runs.store import RunStore
@@ -15,9 +18,10 @@ from scoresymphony_agent.workers.base import Worker, WorkerRequest, WorkerResult
 
 
 class AgentRuntime:
-    def __init__(self, state_dir) -> None:
+    def __init__(self, state_dir: Path) -> None:
         self.tasks = TaskStore(state_dir)
         self.runs = RunStore(state_dir)
+        self.reviews = ReviewStore(state_dir)
         self.events = EventStore(state_dir)
 
     def create_task(
@@ -45,7 +49,12 @@ class AgentRuntime:
         )
         return task
 
-    def execute(self, task_id: str, worker: Worker, reviewer: Reviewer) -> tuple[Run, WorkerResult, ReviewResult]:
+    def execute(
+        self,
+        task_id: str,
+        worker: Worker,
+        reviewer: Reviewer,
+    ) -> tuple[Run, WorkerResult, ReviewResult]:
         task = self.tasks.get(task_id)
         if task.risk is RiskClass.CRITICAL:
             raise PermissionError("Critical tasks require a human-controlled execution path")
@@ -63,7 +72,14 @@ class AgentRuntime:
         task.status = TaskStatus.RUNNING
         task.updated_at = utc_now()
         self.tasks.save(task)
-        self.events.append(event_type="run.started", component="runtime", result="ok", task_id=task.task_id, run_id=run.run_id, attempt_id=attempt.attempt_id)
+        self.events.append(
+            event_type="run.started",
+            component="runtime",
+            result="ok",
+            task_id=task.task_id,
+            run_id=run.run_id,
+            attempt_id=attempt.attempt_id,
+        )
 
         request = WorkerRequest(
             task_id=task.task_id,
@@ -77,15 +93,20 @@ class AgentRuntime:
         worker_result = worker.run(request)
         attempt.ended_at = utc_now()
         attempt.exit_code = worker_result.exit_code
+        attempt.summary = worker_result.summary
+        attempt.changed_files = list(worker_result.changed_files)
+        attempt.claims = list(worker_result.claims)
         attempt.status = RunStatus.SUCCEEDED if worker_result.success else RunStatus.FAILED
 
         if not worker_result.success:
             run.status = RunStatus.FAILED
             task.status = TaskStatus.BLOCKED
             attempt.failure_reason = worker_result.summary
-            review = ReviewResult(
-                review_id="SCORESYMPHONY-REVIEW-NOT-RUN",
-                review_status=ReviewStatus.BLOCKED,
+            review = ReviewResult.blocked(
+                task_id=task.task_id,
+                run_id=run.run_id,
+                attempt_id=attempt.attempt_id,
+                reviewer_id="not-run",
                 recommendation="Worker failed before review",
             )
         else:
@@ -98,9 +119,22 @@ class AgentRuntime:
                 run.status = RunStatus.BLOCKED
                 task.status = TaskStatus.BLOCKED
 
+        validate_review(review)
+        self.reviews.save(review)
         run.updated_at = utc_now()
         task.updated_at = utc_now()
         self.runs.save(run)
         self.tasks.save(task)
-        self.events.append(event_type="run.finished", component="runtime", result=run.status.value, task_id=task.task_id, run_id=run.run_id, attempt_id=attempt.attempt_id, payload={"review_status": review.review_status.value})
+        self.events.append(
+            event_type="run.finished",
+            component="runtime",
+            result=run.status.value,
+            task_id=task.task_id,
+            run_id=run.run_id,
+            attempt_id=attempt.attempt_id,
+            payload={
+                "review_id": review.review_id,
+                "review_status": review.review_status.value,
+            },
+        )
         return run, worker_result, review

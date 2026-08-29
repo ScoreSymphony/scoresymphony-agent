@@ -26,6 +26,9 @@ class Attempt:
     ended_at: str | None = None
     exit_code: int | None = None
     failure_reason: str | None = None
+    summary: str = ""
+    changed_files: list[str] = field(default_factory=list)
+    claims: list[str] = field(default_factory=list)
 
     @classmethod
     def new(cls, agent_id: str) -> Attempt:
@@ -60,6 +63,9 @@ class Run:
                 ended_at=item.get("ended_at"),
                 exit_code=item.get("exit_code"),
                 failure_reason=item.get("failure_reason"),
+                summary=str(item.get("summary", "")),
+                changed_files=list(item.get("changed_files", [])),
+                claims=list(item.get("claims", [])),
             )
             for item in value.get("attempts", [])
         ]
