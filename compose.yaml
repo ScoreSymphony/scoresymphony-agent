@@ -1,0 +1,16 @@
+services:
+  scoresymphony-agent:
+    build:
+      context: .
+    image: scoresymphony-agent:local
+    command: ["status"]
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - scoresymphony-agent-state:/var/lib/scoresymphony-agent
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  scoresymphony-agent-state:
