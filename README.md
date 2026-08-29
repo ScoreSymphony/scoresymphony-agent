@@ -9,7 +9,8 @@ The repository now provides the executable foundation for:
 - tasks with risk, scope and acceptance criteria;
 - file-backed atomic state;
 - append-only event history;
-- runs and attempts;
+- runs and attempts with persisted worker summaries, changed files and claims;
+- persisted structured reviews linked to task/run/attempt/reviewer identities;
 - model/provider-neutral worker and reviewer contracts;
 - fail-closed structured review validation;
 - deny-by-default deterministic tool authorization;
@@ -44,7 +45,14 @@ Start the API:
 scoresymphony-agent serve
 ```
 
-Endpoints include `GET /healthz`, `GET /v1/status`, `GET/POST /v1/tasks`, and `GET /v1/tasks/{task_id}`.
+Endpoints include:
+
+- `GET /healthz`
+- `GET /v1/status`
+- `GET/POST /v1/tasks`
+- `GET /v1/tasks/{task_id}`
+- `GET /v1/tasks/{task_id}/runs`
+- `GET /v1/runs/{run_id}/reviews`
 
 ## Docker
 
