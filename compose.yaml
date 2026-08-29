@@ -3,7 +3,14 @@ services:
     build:
       context: .
     image: scoresymphony-agent:local
-    command: ["status"]
+    restart: unless-stopped
+    environment:
+      SCORESYMPHONY_ENV: development
+      SCORESYMPHONY_STATE_DIR: /var/lib/scoresymphony-agent
+      SCORESYMPHONY_HOST: 0.0.0.0
+      SCORESYMPHONY_PORT: 8000
+    ports:
+      - "127.0.0.1:8000:8000"
     read_only: true
     tmpfs:
       - /tmp
@@ -11,6 +18,8 @@ services:
       - scoresymphony-agent-state:/var/lib/scoresymphony-agent
     security_opt:
       - no-new-privileges:true
+    cap_drop:
+      - ALL
 
 volumes:
   scoresymphony-agent-state:

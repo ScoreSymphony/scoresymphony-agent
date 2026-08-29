@@ -1,41 +1,61 @@
-# ScoreSymphony Agent
+# scoresymphony-agent
 
-`ScoreSymphony Agent` is the standalone agent application for coordinating tasks, runs, state, workspaces, tools, workers, reviews, policies, and later API/UI access around ScoreSymphony development workflows.
+Standalone, provider-neutral control application for ScoreSymphony agent workflows.
 
-## Bootstrap status
+## Current scope
 
-This repository currently contains the minimal application skeleton only. It does not yet provide production-ready agent orchestration, autonomous coding, deployment, or VPS administration.
+The repository now provides the executable foundation for:
 
-## Initial layout
+- tasks with risk, scope and acceptance criteria;
+- file-backed atomic state;
+- append-only event history;
+- runs and attempts;
+- model/provider-neutral worker and reviewer contracts;
+- fail-closed structured review validation;
+- deny-by-default deterministic tool authorization;
+- HTTP API and CLI;
+- a deterministic mock end-to-end loop for development tests;
+- one-container Docker/Compose deployment shape;
+- CI tests, linting and Docker build validation.
 
-- `src/scoresymphony_agent/` – Python application core
-- `frontend/` – future web interface
-- `config/` – non-secret configuration templates
-- `schemas/` – machine-readable contracts
-- `tests/` – automated tests
-- `docs/` – architecture and operating documentation
-- `Dockerfile` / `compose.yaml` – minimal container packaging
-
-## Principles
-
-- keep the first version small and deterministic
-- do not duplicate ScoreSymphony product logic
-- isolate workers and permissions only when concrete requirements justify it
-- keep secrets out of Git
-- prefer one application and one container initially
-- add services such as PostgreSQL only when a real dependency exists
+It intentionally does **not** yet contain real FCC, Codex, Hermes, Qwen, Graphify, PostgreSQL, Git worktree automation or production deployment logic.
 
 ## Local development
 
 ```bash
 python -m venv .venv
-python -m pip install -e .
+# Activate the environment for your shell.
+python -m pip install -e ".[dev]"
+pytest -q
+ruff check .
+```
+
+Create and inspect tasks:
+
+```bash
+scoresymphony-agent task create "Example task" --risk low
+scoresymphony-agent task list
 scoresymphony-agent status
 ```
+
+Start the API:
+
+```bash
+scoresymphony-agent serve
+```
+
+Endpoints include `GET /healthz`, `GET /v1/status`, `GET/POST /v1/tasks`, and `GET /v1/tasks/{task_id}`.
 
 ## Docker
 
 ```bash
-docker compose build
-docker compose run --rm scoresymphony-agent status
+docker compose up --build
 ```
+
+The Compose file binds the API to `127.0.0.1:8000` by default and persists state in a named volume. It does not expose the service publicly.
+
+## Design rule
+
+Keep the first deployment simple: one repository, one Compose project, one application container. Add separate runner/database/model containers only when an actual isolation or persistence requirement appears.
+
+See `docs/architecture.md` and `docs/adapter-roadmap.md`.

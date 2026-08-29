@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scoresymphony.dev/schemas/agent/review-result.schema.json",
+  "title": "ScoreSymphony Agent Review Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "review_id", "review_status", "findings", "scope_assessment", "test_assessment", "unauthorized_changes", "recommendation", "created_at"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "review_id": {"type": "string"},
+    "review_status": {"enum": ["approved", "changes_requested", "blocked"]},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding_id", "severity", "component", "description", "evidence", "recommendation", "review_round"],
+        "properties": {
+          "finding_id": {"type": "string"},
+          "severity": {"enum": ["critical", "major", "minor"]},
+          "component": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1},
+          "evidence": {"type": "string", "minLength": 1},
+          "recommendation": {"type": "string"},
+          "review_round": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "scope_assessment": {"type": "string"},
+    "test_assessment": {"type": "string"},
+    "unauthorized_changes": {"type": "array", "items": {"type": "string"}},
+    "recommendation": {"type": "string"},
+    "created_at": {"type": "string"}
+  }
+}
