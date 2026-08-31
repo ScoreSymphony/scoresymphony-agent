@@ -31,3 +31,46 @@ def test_system_reports_bootstrap_capabilities(tmp_path: Path) -> None:
     body = response.json()
     assert body["environment"] == "test"
     assert body["capabilities"]["codex_review"] == "PLANNED"
+
+
+def test_forward_auth_rejects_untrusted_headers(tmp_path: Path) -> None:
+    settings = Settings(
+        environment="test",
+        state_root=tmp_path / "state",
+        auth_mode="forward_auth",
+        frontend_dir=tmp_path / "missing-frontend",
+        proxy_secret="trusted-secret",
+    )
+    client = TestClient(create_app(settings))
+
+    response = client.get(
+        "/api/v1/me",
+        headers={"Remote-User": "alice", "Remote-Groups": "scoresymphony-owner"},
+    )
+    assert response.status_code == 401
+
+
+def test_forward_auth_maps_authenticated_principal_role(tmp_path: Path) -> None:
+    settings = Settings(
+        environment="test",
+        state_root=tmp_path / "state",
+        auth_mode="forward_auth",
+        frontend_dir=tmp_path / "missing-frontend",
+        proxy_secret="trusted-secret",
+    )
+    client = TestClient(create_app(settings))
+
+    response = client.get(
+        "/api/v1/me",
+        headers={
+            "X-ScoreSymphony-Proxy-Secret": "trusted-secret",
+            "Remote-User": "alice",
+            "Remote-Groups": "developers,scoresymphony-owner",
+            "Remote-Email": "alice@example.test",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["principal_id"] == "alice"
+    assert body["role"] == "OWNER"
+    assert body["email"] == "alice@example.test"
