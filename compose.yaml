@@ -1,0 +1,25 @@
+services:
+  agent:
+    build:
+      context: .
+    image: scoresymphony-agent:local
+    restart: unless-stopped
+    environment:
+      SCORESYMPHONY_ENV: production
+      SCORESYMPHONY_STATE_ROOT: /var/lib/scoresymphony-agent
+      SCORESYMPHONY_AUTH_MODE: disabled
+    ports:
+      - "127.0.0.1:${SCORESYMPHONY_AGENT_PORT:-8080}:8080"
+    volumes:
+      - scoresymphony-agent-state:/var/lib/scoresymphony-agent
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+
+volumes:
+  scoresymphony-agent-state:
