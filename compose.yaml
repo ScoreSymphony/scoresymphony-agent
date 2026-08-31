@@ -5,7 +5,7 @@ services:
     image: scoresymphony-agent:local
     restart: unless-stopped
     environment:
-      SCORESYMPHONY_ENV: production
+      SCORESYMPHONY_ENV: staging
       SCORESYMPHONY_STATE_ROOT: /var/lib/scoresymphony-agent
       SCORESYMPHONY_AUTH_MODE: disabled
     ports:
