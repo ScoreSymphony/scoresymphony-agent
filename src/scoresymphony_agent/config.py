@@ -17,8 +17,8 @@ class Settings:
         environment = os.getenv("SCORESYMPHONY_ENV", "development")
         default_state = "/var/lib/scoresymphony-agent" if environment == "production" else "./state-local"
         auth_mode = os.getenv("SCORESYMPHONY_AUTH_MODE", "development")
-        if environment == "production" and auth_mode == "development":
-            raise RuntimeError("development authentication is forbidden in production")
+        if environment == "production" and auth_mode in {"development", "disabled"}:
+            raise RuntimeError("production requires an explicit authenticated principal provider")
         return cls(
             environment=environment,
             state_root=Path(os.getenv("SCORESYMPHONY_STATE_ROOT", default_state)),
